@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Effects Lab - Interactive Science Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .creator-credit {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            padding: 20px;
+            min-height: 600px;
+        }
+
+        .experiment-zone {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            border: 3px dashed #ddd;
+        }
+
+        .controls-panel {
+            background: #2c3e50;
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .force-controls {
+            margin-bottom: 30px;
+        }
+
+        .force-controls h3 {
+            color: #3498db;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .force-slider {
+            width: 100%;
+            margin: 10px 0;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: #34495e;
+            outline: none;
+        }
+
+        .force-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e74c3c;
+            cursor: pointer;
+        }
+
+        .force-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .force-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .push-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .pull-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .twist-btn {
+            background: #f39c12;
+            color: white;
+        }
+
+        .squeeze-btn {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .force-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .object {
+            position: absolute;
+            transition: all 0.5s ease;
+            cursor: pointer;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .ball {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
+            border-radius: 50%;
+            top: 200px;
+            left: 100px;
+        }
+
+        .box {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #f39c12, #d68910);
+            top: 300px;
+            left: 300px;
+        }
+
+        .spring {
+            width: 120px;
+            height: 40px;
+            background: repeating-linear-gradient(90deg, #2ecc71, #2ecc71 10px, #27ae60 10px, #27ae60 20px);
+            top: 250px;
+            left: 500px;
+            border-radius: 20px;
+        }
+
+        .effects-display {
+            background: #ecf0f1;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .effects-display h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .effect-item {
+            background: #3498db;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            margin: 5px 0;
+            font-size: 0.9rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .score-board {
+            background: #27ae60;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-board h3 {
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .instructions {
+            background: #f1c40f;
+            color: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h4 {
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            line-height: 1.6;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="creator-credit">Created by Hrishikesh M (PGT Physics)</div>
+            <h1>🔬 Force Effects Lab</h1>
+            <p>Discover how forces change motion, shape, and direction!</p>
+        </div>
+
+        <div class="game-area">
+            <div class="experiment-zone" id="experimentZone">
+                <div class="object ball" id="ball">⚽ Ball</div>
+                <div class="object box" id="box">📦 Box</div>
+                <div class="object spring" id="spring">🌀 Spring</div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="score-board">
+                    <h3>🏆 Discovery Points</h3>
+                    <div class="score" id="score">0</div>
+                </div>
+
+                <div class="instructions">
+                    <h4>🎯 How to Play:</h4>
+                    <ul>
+                        <li>Click on objects to select them</li>
+                        <li>Adjust force strength with slider</li>
+                        <li>Apply different types of forces</li>
+                        <li>Observe the effects!</li>
+                    </ul>
+                </div>
+
+                <div class="force-controls">
+                    <h3>⚡ Force Strength</h3>
+                    <input type="range" class="force-slider" id="forceSlider" min="1" max="10" value="5">
+                    <div style="text-align: center; margin-top: 5px;">
+                        <span id="forceValue">5</span> Newtons
+                    </div>
+                </div>
+
+                <div class="force-controls">
+                    <h3>🎮 Apply Forces</h3>
+                    <div class="force-buttons">
+                        <button class="force-btn push-btn" onclick="applyForce('push')">👉 Push</button>
+                        <button class="force-btn pull-btn" onclick="applyForce('pull')">👈 Pull</button>
+                        <button class="force-btn twist-btn" onclick="applyForce('twist')">🔄 Twist</button>
+                        <button class="force-btn squeeze-btn" onclick="applyForce('squeeze')">🤏 Squeeze</button>
+                    </div>
+                </div>
+
+                <div class="effects-display">
+                    <h4>📋 Observed Effects:</h4>
+                    <div id="effectsList"></div>
+                </div>
+
+                <button class="reset-btn" onclick="resetExperiment()">🔄 Reset Lab</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedObject = null;
+        let score = 0;
+        let discoveredEffects = new Set();
+        
+        const forceSlider = document.getElementById('forceSlider');
+        const forceValue = document.getElementById('forceValue');
+        const scoreElement = document.getElementById('score');
+        const effectsList = document.getElementById('effectsList');
+
+        // Update force value display
+        forceSlider.addEventListener('input', function() {
+            forceValue.textContent = this.value;
+        });
+
+        // Object selection
+        document.querySelectorAll('.object').forEach(obj => {
+            obj.addEventListener('click', function() {
+                // Remove previous selection
+                document.querySelectorAll('.object').forEach(o => {
+                    o.style.border = 'none';
+                });
+                
+                // Select current object
+                this.style.border = '3px solid #e74c3c';
+                selectedObject = this;
+                
+                // Add selection effect
+                this.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+
+        function applyForce(forceType) {
+            if (!selectedObject) {
+                alert('🎯 Please select an object first by clicking on it!');
+                return;
+            }
+
+            const forceStrength = parseInt(forceSlider.value);
+            const objectType = selectedObject.id;
+            
+            // Apply visual effects based on force type and object
+            applyVisualEffect(selectedObject, forceType, forceStrength);
+            
+            // Record the effect
+            const effect = getEffectDescription(objectType, forceType, forceStrength);
+            addEffect(effect);
+            
+            // Update score
+            updateScore(forceType, objectType);
+        }
+
+        function applyVisualEffect(object, forceType, strength) {
+            const currentLeft = parseInt(object.style.left) || 100;
+            const currentTop = parseInt(object.style.top) || 200;
+            
+            switch(forceType) {
+                case 'push':
+                    // Move object to the right
+                    object.style.left = Math.min(currentLeft + strength * 20, 600) + 'px';
+                    object.style.background = object.id === 'ball' ? 
+                        'radial-gradient(circle at 70% 30%, #ff6b6b, #c0392b)' : 
+                        object.style.background;
+                    break;
+                    
+                case 'pull':
+                    // Move object to the left
+                    object.style.left = Math.max(currentLeft - strength * 20, 10) + 'px';
+                    object.style.background = object.id === 'ball' ? 
+                        'radial-gradient(circle at 10% 30%, #ff6b6b, #c0392b)' : 
+                        object.style.background;
+                    break;
+                    
+                case 'twist':
+                    // Rotate object
+                    object.style.transform = `rotate(${strength * 36}deg)`;
+                    setTimeout(() => {
+                        object.style.transform = 'rotate(0deg)';
+                    }, 1000);
+                    break;
+                    
+                case 'squeeze':
+                    // Compress object
+                    if (object.id === 'spring') {
+                        object.style.width = Math.max(120 - strength * 8, 40) + 'px';
+                        setTimeout(() => {
+                            object.style.width = '120px';
+                        }, 1000);
+                    } else {
+                        object.style.transform = `scale(${1 - strength * 0.05})`;
+                        setTimeout(() => {
+                            object.style.transform = 'scale(1)';
+                        }, 1000);
+                    }
+                    break;
+            }
+        }
+
+        function getEffectDescription(objectType, forceType, strength) {
+            const effects = {
+                ball: {
+                    push: `Ball moved ${strength * 2}cm to the right - Motion Effect!`,
+                    pull: `Ball moved ${strength * 2}cm to the left - Motion Effect!`,
+                    twist: `Ball rotated ${strength * 36}° - Rotational Motion!`,
+                    squeeze: `Ball compressed slightly - Shape Change Effect!`
+                },
+                box: {
+                    push: `Box slid ${strength * 2}cm forward - Translational Motion!`,
+                    pull: `Box pulled ${strength * 2}cm backward - Force overcame friction!`,
+                    twist: `Box rotated ${strength * 36}° - Torque applied!`,
+                    squeeze: `Box compressed under pressure - Deformation Effect!`
+                },
+                spring: {
+                    push: `Spring moved and may compress - Elastic potential energy!`,
+                    pull: `Spring stretched - Elastic deformation!`,
+                    twist: `Spring twisted - Torsional deformation!`,
+                    squeeze: `Spring compressed by ${strength * 8}mm - Hooke's Law in action!`
+                }
+            };
+            
+            return effects[objectType][forceType];
+        }
+
+        function addEffect(effect) {
+            if (!discoveredEffects.has(effect)) {
+                discoveredEffects.add(effect);
+                
+                const effectElement = document.createElement('div');
+                effectElement.className = 'effect-item';
+                effectElement.textContent = effect;
+                
+                effectsList.appendChild(effectElement);
+                
+                // Scroll to show new effect
+                effectsList.scrollTop = effectsList.scrollHeight;
+            }
+        }
+
+        function updateScore(forceType, objectType) {
+            const points = {
+                push: 10,
+                pull: 10,
+                twist: 15,
+                squeeze: 20
+            };
+            
+            score += points[forceType];
+            scoreElement.textContent = score;
+            
+            // Celebration effect for high scores
+            if (score > 0 && score % 100 === 0) {
+                scoreElement.style.animation = 'none';
+                setTimeout(() => {
+                    scoreElement.style.animation = 'fadeIn 0.5s ease';
+                }, 10);
+            }
+        }
+
+        function resetExperiment() {
+            // Reset object positions and styles
+            document.getElementById('ball').style.cssText = `
+                width: 80px; height: 80px;
+                background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
+                border-radius: 50%; top: 200px; left: 100px;
+                position: absolute; transition: all 0.5s ease;
+                cursor: pointer; display: flex; align-items: center;
+                justify-content: center; font-weight: bold; color: white;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            `;
+            
+            document.getElementById('box').style.cssText = `
+                width: 100px; height: 100px;
+                background: linear-gradient(45deg, #f39c12, #d68910);
+                top: 300px; left: 300px; border-radius: 10px;
+                position: absolute; transition: all 0.5s ease;
+                cursor: pointer; display: flex; align-items: center;
+                justify-content: center; font-weight: bold; color: white;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            `;
+            
+            document.getElementById('spring').style.cssText = `
+                width: 120px; height: 40px;
+                background: repeating-linear-gradient(90deg, #2ecc71, #2ecc71 10px, #27ae60 10px, #27ae60 20px);
+                top: 250px; left: 500px; border-radius: 20px;
+                position: absolute; transition: all 0.5s ease;
+                cursor: pointer; display: flex; align-items: center;
+                justify-content: center; font-weight: bold; color: white;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            `;
+            
+            // Reset game state
+            selectedObject = null;
+            score = 0;
+            discoveredEffects.clear();
+            scoreElement.textContent = '0';
+            effectsList.innerHTML = '';
+            forceSlider.value = 5;
+            forceValue.textContent = '5';
+        }
+
+        // Initialize with a welcome message
+        setTimeout(() => {
+            addEffect('🎉 Welcome to Force Effects Lab! Start by clicking on an object!');
+        }, 1000);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'979452f6a5ff49a6',t:'MTc1Njg5MjgyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
